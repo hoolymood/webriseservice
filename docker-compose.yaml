@@ -2,7 +2,7 @@ version: '3'
 
 services:
 
-  postgres:
+  webrise_db:
     image: postgres:15-alpine
     ports:
       - "5432:5432"
@@ -10,3 +10,20 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=webrise_service_db
+    networks:
+      - webrise_network
+
+  webrise-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - webrise_db
+    ports:
+      - "8080:8080"
+    networks:
+      - webrise_network
+
+networks:
+  webrise_network:
+    driver: bridge
