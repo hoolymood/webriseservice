@@ -13,7 +13,8 @@ import com.example.webriseservice.handler.exception.SubscriptionNotFoundExceptio
 import com.example.webriseservice.handler.exception.UserAlreadyExistsException;
 import com.example.webriseservice.handler.exception.UserNotFoundException;
 import com.example.webriseservice.log.Loggable;
-import com.example.webriseservice.repo.SubscriptionRepo;
+import com.example.webriseservice.mapper.SubscriptionDtoMapper;
+import com.example.webriseservice.mapper.UserDtoMapper;
 import com.example.webriseservice.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,12 +30,13 @@ import java.util.UUID;
 public class UserServiceImp implements UserService {
 
     private final UserRepo userRepo;
-    private final SubscriptionRepo subscriptionRepo;
+    private final UserDtoMapper userDtoMapper;
+    private final SubscriptionDtoMapper subscriptionDtoMapper;
 
     @Override
     public UserResponseDto get(UUID id) {
         User user = findById(id);
-        return new UserResponseDto(user.getUsername(), user.getPhone());
+        return userDtoMapper.toDto(user);
     }
 
     @Override
@@ -44,7 +46,7 @@ public class UserServiceImp implements UserService {
         user.setUsername(userRequestUpdateDto.username());
         user.setPhone(userRequestUpdateDto.phone());
 
-        return new UserResponseDto(user.getUsername(), user.getPhone());
+        return userDtoMapper.toDto(user);
     }
 
     @Override
@@ -52,25 +54,26 @@ public class UserServiceImp implements UserService {
         userRepo.deleteById(id);
     }
 
-    @Transactional
     @Override
+    @Transactional
     public UserResponseDto addSubscription(UUID userId, SubscriptionRequestDto subscriptionRequestDto) {
         User user = findById(userId);
 
         boolean exists = user.getSubscriptions()
                 .stream()
-                .anyMatch(subscription -> subscription.getName().equals(subscriptionRequestDto.name()));
+                .anyMatch(subscription -> subscription.getSubscriptionName().equals(subscriptionRequestDto.subscriptionName()));
 
         if (exists) throw new DuplicateSubscriptionException(
-                String.format("User already has this subscription %s", subscriptionRequestDto.name())
+                String.format("User already has this subscription %s", subscriptionRequestDto.subscriptionName())
         );
 
         Subscription subscription = new Subscription();
-        subscription.setName(subscriptionRequestDto.name());
+        subscription.setSubscriptionName(subscriptionRequestDto.subscriptionName());
         subscription.setStart(LocalDateTime.now());
         user.addSubscription(subscription);
 
-        return new UserResponseDto(user.getUsername(), user.getPhone());
+        User saved = userRepo.save(user);
+        return userDtoMapper.toDto(saved);
     }
 
 
@@ -97,8 +100,7 @@ public class UserServiceImp implements UserService {
     public List<SubscriptionResponseDto> getSubscriptions(UUID userId) {
         User user = findById(userId);
 
-        return user.getSubscriptions().stream().map(subscription ->
-                new SubscriptionResponseDto(subscription.getId(), subscription.getName(), subscription.getStart())).toList();
+        return user.getSubscriptions().stream().map(subscriptionDtoMapper::toDto).toList();
     }
 
 

@@ -13,9 +13,9 @@ import java.util.UUID;
 public interface SubscriptionRepo extends JpaRepository<Subscription, UUID> {
 
     @Query("""
-            SELECT s.name
+            SELECT s.subscriptionName
             FROM Subscription s
-            GROUP BY name ORDER BY COUNT (s.name) DESC limit 3
+            GROUP BY subscriptionName ORDER BY COUNT (s.subscriptionName) DESC limit 3
             """)
     List<String> top();
 

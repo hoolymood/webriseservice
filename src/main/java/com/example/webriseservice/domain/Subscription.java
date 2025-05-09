@@ -15,6 +15,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -29,12 +31,13 @@ public class Subscription {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @Column(name = "name")
+    @Column(name = "subscription_name")
     @Enumerated(EnumType.STRING)
-    private SubscriptionName name;
+    @JdbcType(PostgreSQLEnumJdbcType.class)
+    private SubscriptionName subscriptionName;
     @Column(name = "start_date")
     private LocalDateTime start;
-    @ManyToOne (fetch = FetchType.LAZY)
-    @JoinColumn (name = "usr_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usr_id")
     private User user;
 }

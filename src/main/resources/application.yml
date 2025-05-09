@@ -6,12 +6,11 @@ spring:
   jpa:
     hibernate:
       show_sql: true
-      ddl_auto: create
+      ddl_auto: validate
 
   datasource:
     driverClassName: org.postgresql.Driver
     username: postgres
     password: postgres
     url: jdbc:postgresql://webrise_db/webrise_service_db
-
 

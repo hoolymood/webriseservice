@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public record SubscriptionResponseDto(
         UUID id,
-        SubscriptionName name,
+        SubscriptionName subscriptionName,
         LocalDateTime start
 ) {
 }
